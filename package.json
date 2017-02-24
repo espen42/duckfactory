@@ -1,0 +1,19 @@
+{
+  "name": "duckfactory",
+  "version": "0.0.1",
+  "description": "Factory for creating redux ducks",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/espen42/duckfactory.git"
+  },
+  "author": "Espen Norderud",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/espen42/duckfactory/issues"
+  },
+  "homepage": "https://github.com/espen42/duckfactory#readme"
+}
