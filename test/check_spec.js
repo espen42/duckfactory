@@ -19,36 +19,34 @@ describe("check", ()=>{
         //      - doesn't contain the argument name 'type', which is reserved
         it("asserts the actionCreators during the creation", ()=> {
             expect(check.reducerDuck(
-                "PERKELE1",
-                ["woop", "wheee", "satanperkele"],
+                "ACTION1",
+                ["woop", "wheee", "ohyes"],
                 (state) => {
                     console.log("Awright");
                 }
             )).to.equal(true);
 
-
-
             expect(check.reducerDuck(
-                "PERKELE2",
-                ["woop", "wheee", "satanperkele"],
+                "ACTION2",
+                ["woop", "wheee", "ohyes"],
                 (state, action)=>{ console.log("Awright"); },
             )).to.equal(true);
 
 
 
             expect(check.reducerDuck(
-                "PERKELE3",
-                ["woop", "wheee", "satanperkele"],
-                (state, {woop, wheee, satanperkele}) => {
+                "ACTION3",
+                ["woop", "wheee", "ohyes"],
+                (state, {woop, wheee, ohyes}) => {
                     console.log("Awright");
                 },
             )).to.equal(true);
 
             // It's happy as long as the reducers's action at least gets the arguments it needs
             expect(check.reducerDuck(
-                "PERKELE4",
-                ["woop", "wheee", "satanperkele", "excessive", "superfluous", "redundant", "unused"],
-                (state, {woop, wheee, satanperkele}) => {
+                "ACTION4",
+                ["woop", "wheee", "ohyes", "excessive", "superfluous", "redundant", "unused"],
+                (state, {woop, wheee, ohyes}) => {
                     console.log("Awright");
                 },
             )).to.equal(true);
@@ -56,16 +54,16 @@ describe("check", ()=>{
 
         it("warns (returns false) if the reducer is missing a state argument", ()=>{
             expect(check.reducerDuck(
-                "PERKELE5",
-                ["woop", "wheee", "satanperkele"],
+                "ACTION5",
+                ["woop", "wheee", "ohyes"],
                 ()=>{ console.log("Awright"); },
             )).to.equal(false);
         });
 
         it("warns (returns false) if the reducer's second argument is not 'action' or a deconstructed object", ()=>{
             expect(check.reducerDuck(
-                "PERKELE6",
-                ["woop", "wheee", "satanperkele"],
+                "ACTION6",
+                ["woop", "wheee", "ohyes"],
                 (state, ohnoes)=>{ console.log("Awright"); },
             )).to.equal(false);
         });
@@ -75,8 +73,8 @@ describe("check", ()=>{
             "the reducer's deconstructed action object", ()=>{
             expect( ()=>{
                 check.reducerDuck(
-                    "PERKELE7",
-                    ["woop", "wheee", "satanperkele"],
+                    "ACTION7",
+                    ["woop", "wheee", "ohyes"],
                     (state, {woop, wheee, nothere})=>{ console.log("Awright"); },
                 );
             } ).to.throw(Error);
@@ -86,7 +84,7 @@ describe("check", ()=>{
         it("throws an error if the argument name list contains duplicate names", ()=>{
             expect( ()=>{
                 check.reducerDuck(
-                    "PERKELE8",
+                    "ACTION8",
                     ["woop", "wheee", "wheee"],
                     (state, {woop, whee})=>{ console.log("Awright"); },
                 );
@@ -98,7 +96,7 @@ describe("check", ()=>{
             // Bad characters
             expect( ()=>{
                 check.reducerDuck(
-                    "PERKELE9",
+                    "ACTION9",
                     ["woop", "good1", "pære"],
                     (state, {woop, good1})=>{ console.log("Awright"); },
                 );
@@ -107,7 +105,7 @@ describe("check", ()=>{
             // Starting with a number
             expect( ()=>{
                 check.reducerDuck(
-                    "PERKELE10",
+                    "ACTION10",
                     ["woop", "good1", "1bad"],
                     (state, {woop, good1})=>{ console.log("Awright"); },
                 );
@@ -116,7 +114,7 @@ describe("check", ()=>{
             // Reserved word in JS
             expect( ()=>{
                 check.reducerDuck(
-                    "PERKELE11",
+                    "ACTION11",
                     ["woop", "good1", "catch"],
                     (state, {woop, good1})=>{ console.log("Awright"); },
                 );
@@ -125,7 +123,7 @@ describe("check", ()=>{
             // Empty string
             expect( ()=>{
                 check.reducerDuck(
-                    "PERKELE12",
+                    "ACTION12",
                     ["woop", "good1", ""],
                     (state, {woop, good1})=>{ console.log("Awright"); },
                 );
@@ -135,7 +133,7 @@ describe("check", ()=>{
         it("throws an error if the argument name list contains the name 'type', since that's reserved", ()=>{
             expect( ()=>{
                 check.reducerDuck(
-                    "PERKELE13",
+                    "ACTION13",
                     ["woop", "good1", "type"],
                     (state, {woop, good1, type})=>{ console.log("Awright"); },
                 );
@@ -157,39 +155,39 @@ describe("check", ()=>{
         //      - doesn't contain the argument name 'type', which is reserved
         it("asserts the actionCreators during the creation", ()=> {
             expect(check.sagaGoose(
-                "T_PERKELE1",
-                ["woop", "wheee", "satanperkele"],
+                "T_ACTION1",
+                ["woop", "wheee", "ohyes"],
                 function*() { while(always) { yield "Awright"; } }
             )).to.equal(true);
 
 
 
             expect(check.sagaGoose(
-                "T_PERKELE2",
-                ["woop", "wheee", "satanperkele"],
+                "T_ACTION2",
+                ["woop", "wheee", "ohyes"],
                 function* (action){ while(always) { yield "Awright"; } }
             )).to.equal(true);
 
 
 
             expect(check.sagaGoose(
-                "T_PERKELE3",
-                ["woop", "wheee", "satanperkele"],
-                function* ({woop, wheee, satanperkele}) { while(always) { yield "Awright"; } },
+                "T_ACTION3",
+                ["woop", "wheee", "ohyes"],
+                function* ({woop, wheee, ohyes}) { while(always) { yield "Awright"; } },
             )).to.equal(true);
 
             // It's happy as long as the reducers's action at least gets the arguments it needs
             expect(check.sagaGoose(
-                "T_PERKELE4",
-                ["woop", "wheee", "satanperkele", "excessive", "superfluous", "redundant", "unused"],
-                function* ({woop, wheee, satanperkele}) { while(always) { yield "Awright"; } },
+                "T_ACTION4",
+                ["woop", "wheee", "ohyes", "excessive", "superfluous", "redundant", "unused"],
+                function* ({woop, wheee, ohyes}) { while(always) { yield "Awright"; } },
             )).to.equal(true);
         });
 
         it("warns (returns false) if the reducer's second argument is not 'action' or a deconstructed object", ()=>{
             expect(check.sagaGoose(
-                "T_PERKELE6",
-                ["woop", "wheee", "satanperkele"],
+                "T_ACTION6",
+                ["woop", "wheee", "ohyes"],
                 function* (ohnoes){ while(always) { yield "Awright"; } }
             )).to.equal(false);
         });
@@ -199,8 +197,8 @@ describe("check", ()=>{
             "the reducer's deconstructed action object", ()=>{
             expect( ()=>{
                 check.sagaGoose(
-                    "T_PERKELE7",
-                    ["woop", "wheee", "satanperkele"],
+                    "T_ACTION7",
+                    ["woop", "wheee", "ohyes"],
                     function* ({woop, wheee, nothere}){ while(always) { yield "Awright"; } }
                 );
             } ).to.throw(Error);
@@ -210,7 +208,7 @@ describe("check", ()=>{
         it("throws an error if the argument name list contains duplicate names", ()=>{
             expect( ()=>{
                 check.sagaGoose(
-                    "T_PERKELE8",
+                    "T_ACTION8",
                     ["woop", "wheee", "wheee"],
                     function* ({woop, whee}){ while(always) { yield "Awright"; } }
                 );
@@ -222,7 +220,7 @@ describe("check", ()=>{
             // Bad characters
             expect( ()=>{
                 check.sagaGoose(
-                    "T_PERKELE9",
+                    "T_ACTION9",
                     ["woop", "good1", "pære"],
                     function* ({woop, good1}){ while(always) { yield "Awright"; } }
                 );
@@ -231,7 +229,7 @@ describe("check", ()=>{
             // Starting with a number
             expect( ()=>{
                 check.sagaGoose(
-                    "T_PERKELE10",
+                    "T_ACTION10",
                     ["woop", "good1", "1bad"],
                     function* ({woop, good1}){ while(always) { yield "Awright"; } }
                 );
@@ -240,7 +238,7 @@ describe("check", ()=>{
             // Reserved word in JS
             expect( ()=>{
                 check.sagaGoose(
-                    "T_PERKELE11",
+                    "T_ACTION11",
                     ["woop", "good1", "catch"],
                     function* ({woop, good1}){ while(always) { yield "Awright"; } }
                 );
@@ -249,7 +247,7 @@ describe("check", ()=>{
             // Empty string
             expect( ()=>{
                 check.sagaGoose(
-                    "T_PERKELE12",
+                    "T_ACTION12",
                     ["woop", "good1", ""],
                     function* ({woop, good1}){ while(always) { yield "Awright"; } }
                 );
@@ -259,7 +257,7 @@ describe("check", ()=>{
         it("throws an error if the argument name list contains the name 'type', since that's reserved", ()=>{
             expect( ()=>{
                 check.sagaGoose(
-                    "T_PERKELE13",
+                    "T_ACTION13",
                     ["woop", "good1", "type"],
                     function* ({woop, good1, type}){ while(always) { yield "Awright"; } }
                 );
@@ -315,38 +313,38 @@ describe("check", ()=>{
 
         it("throws an error on duplicate actionTypes between this duck/goose or any other", ()=> {
             expect( ()=>check.sagaGoose(
-                "T_PERKELE14",
-                ["woop", "wheee", "satanperkele"],
+                "T_ACTION14",
+                ["woop", "wheee", "ohyes"],
                 function*() { while(always) { yield "Awright"; } }
             )).to.not.throw(Error);
 
             expect( ()=>check.sagaGoose(
                 "WHOOPSIE",
-                ["woop", "wheee", "satanperkele"],
+                ["woop", "wheee", "ohyes"],
                 function*() { while(always) { yield "Awright"; } }
             )).to.not.throw(Error);
 
             expect( ()=>check.sagaGoose(
-                "T_PERKELE15",
-                ["woop", "wheee", "satanperkele"],
+                "T_ACTION15",
+                ["woop", "wheee", "ohyes"],
                 function*() { while(always) { yield "Awright"; } }
             )).to.not.throw(Error);
 
             expect( ()=>check.sagaGoose(
                 "WHOOPSIE",
-                ["woop", "wheee", "satanperkele"],
+                ["woop", "wheee", "ohyes"],
                 function*() { while(always) { yield "Awright"; } }
             )).to.throw(Error);
 
             expect( ()=>check.sagaGoose(
-                "T_PERKELE16",
-                ["woop", "wheee", "satanperkele"],
+                "T_ACTION16",
+                ["woop", "wheee", "ohyes"],
                 function*() { while(always) { yield "Awright"; } }
             )).to.not.throw(Error);
 
             expect( ()=>check.sagaGoose(
-                "T_PERKELE16",
-                ["woop", "wheee", "satanperkele"],
+                "T_ACTION16",
+                ["woop", "wheee", "ohyes"],
                 function*() { while(always) { yield "Awright"; } }
             )).to.throw(Error);
         });
