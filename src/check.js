@@ -55,12 +55,11 @@ const checkActionArgumentNames = (actionArgumentNames, actionType) => {
 
 // The action can have arguments that the reducer doesn't use. But the action must have all arguments
 // that the reducer uses!
-const checkHealthy = (actionType, argumentNames, func, functionIsReducer) => {
+const checkHealthy = (actionType, actionArgumentNames = [], func, functionIsReducer) => {
     let healthy = true;
 
     checkActionName(actionType);
 
-    const actionArgumentNames = argumentNames || [];
     if (func != null) {
         const reducerArgs = getFunctionArgNames(func);
         //console.log("reducerFunction args:", JSON.stringify(reducerArgs));
