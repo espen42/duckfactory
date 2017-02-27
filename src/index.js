@@ -18,10 +18,6 @@ const getReducerArgNames = (reducerFunc, actionType) => {
                 }
                 return refArgs || [];
 
-            } else if (secondArg !== "action") {
-                console.warn("Possible flaw in duck action '" + actionType +
-                    "': the reducer function expected 'action' as the name of its second argument");
-                return [];
             }
         }
     }
@@ -54,7 +50,7 @@ const makeActionCreator = (actionType, actionArgumentNames = []) => (...args) =>
 
 
 
-const buildActionCreatorAndReducerMap = (prefix, actionAndReducerMap, checkAndWarn, logProduced) => {
+const buildMaps = (prefix, actionAndReducerMap, checkAndWarn, logBuilt) => {
     const actionCreatorMap = {};
     const reducerMap = {};
     const typeMap = {};
@@ -73,7 +69,7 @@ const buildActionCreatorAndReducerMap = (prefix, actionAndReducerMap, checkAndWa
         reducerMap[actionName] = reducerFunction;
         typeMap[actionName] = actionType;
 
-        if (logProduced) {
+        if (logBuilt && window.console) {
             console.log("\nActionCreator: getActionCreators()." + actionName + "(" + actionArgumentNames.join(", ") + ")");
             console.log("\tType: getTypes()." + actionName + " = '" + actionType + "'");
         }
@@ -87,13 +83,13 @@ const buildActionCreatorAndReducerMap = (prefix, actionAndReducerMap, checkAndWa
  *  Creates an action-actioncreator-reducer unified complex: a redux duck.
  */
 class DuckFactory {
-    constructor(actionTypePrefix, initialState, actionAndReducerMap, checkAndWarn = true, logProduced = false) {
+    constructor(actionTypePrefix, initialState, actionAndReducerMap, checkAndWarn = true, logBuilt = false) {
         if (actionAndReducerMap == null || (typeof actionAndReducerMap !== 'object')) {
             throw Error("Can't create a duck without actionAndReducerMap: action creator name --> reducer function");
         }
 
-        const [actionCreatorMap, reducerMap, typeMap] = buildActionCreatorAndReducerMap(
-            actionTypePrefix, actionAndReducerMap, checkAndWarn, logProduced);
+        const [actionCreatorMap, reducerMap, typeMap] = buildMaps(
+            actionTypePrefix, actionAndReducerMap, checkAndWarn, logBuilt);
 
         this._actionCreators = actionCreatorMap;
         this._reducer = makeReducer(reducerMap, initialState);
