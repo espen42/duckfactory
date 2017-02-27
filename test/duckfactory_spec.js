@@ -1,96 +1,104 @@
 import { expect } from 'chai';
+import deepFreeze from 'deep-freeze';
 
 import DuckFactory from '../src';
 
-const duckFactory = new DuckFactory("duck/test/", {}, {
-    setHey: (state, {ya}) => ({hey: ya}),
-    doubleHey: (state) => ({hey: state.hey * 2}),
-    insertSecondAndThirdAsWhoaYeah: (state, {first, second, third}) => {
-        return {
-            ...state,
-            hey: first,
-            whoa: second,
-            yeah: "Yeah: " + third,
-        };
-    },
-}, true, true);
+
 
 describe("DuckFactory", ()=>{
-    describe(".getActionCreators().action", ()=>{
-        it("uses the actioncreator to create actions as expected, with arguments", ()=>{
+    describe(".getActionCreators", ()=> {
+        it("exposes an boject with actions creators, corresponding to the keys in the object sent to the creator, " +
+            "where the actioncreator's arguments are the reducer arguments", () => {
+            const duckFactory = new DuckFactory("duck/test1/", {}, {
+                setHey: (state, {ya}) => ({hey: ya}),
+                doubleHey: (state) => ({hey: state.hey * 2}),
+                insertSecondAndThirdAsWhoaYeah: (state, {first, second, third}) => {
+                    return {
+                        ...state,
+                        hey: first,
+                        whoa: second,
+                        yeah: "Yeah: " + third,
+                    };
+                },
+            }, true, true);
 
             const action1 = duckFactory.getActionCreators().setHey(2, 42, 777);
 
             expect(action1).to.deep.equal({
-                type: "duck/test/setHey",
+                type: "duck/test1/setHey",
                 ya: 2,
             });
 
             const action2 = duckFactory.getActionCreators().doubleHey(2, 42, 777);
 
             expect(action2).to.deep.equal({
-                type: "duck/test/doubleHey",
+                type: "duck/test1/doubleHey",
             });
 
             const action3 = duckFactory.getActionCreators().insertSecondAndThirdAsWhoaYeah(2, 42, 777);
 
             expect(action3).to.deep.equal({
-                type: "duck/test/insertSecondAndThirdAsWhoaYeah",
+                type: "duck/test1/insertSecondAndThirdAsWhoaYeah",
                 first: 2,
                 second: 42,
                 third: 777,
             });
         });
-
-
-        /*it("tolerates excessive number of action arguments, compared to the actionCreator actionArgumentNames", ()=>{
-            const duckFactory = new DuckFactory("duck/test/", {}, {
-                ACTION2: (state, {woop, wheee, ohyes}) => {
-                    console.log("Okay");
-                    return state;
-                },
-            }, true, true);
-
-
-            const action = duckFactory.getActionCreators().ACTION2(2, 42, 99, 47, 101);
-            expect(action).to.deep.equal({
-                type: "duck/test/ACTION2",
-                woop: 2,
-                wheee: 42,
-                ohyes: 99,
-            });
-        });
     });
 
-    describe("Construction with an actionAndReducerMap", ()=>{
-        it("Takes input action map ( actionName --> reducerFunction ) and replaces the value in the actionmap with" +
-            "an appropriate action creator", ()=>{
-            const duckFactory = new DuckFactory("duck/test/", {}, {
+    describe(".getReducers", ()=>{
+        it("Takes input action map ( actionName --> reducerFunction ) and exposes a working reducer", ()=>{
+            const duckFactory = new DuckFactory("duck/test2/", {}, {
                 setHey: (state, {ya}) => ({hey: ya}),
                 doubleHey: (state) => ({hey: state.hey * 2}),
                 insertWhoaYeah: (state, {whoa, yeah}) => {
                     return {
                         ...state,
                         whoa: whoa,
-                        yeah: "Yeah: " + yeah,
+                        yeah: "Yeah " + yeah,
                     };
                 },
             }, true, true);
 
-            const actions1 = ;
+            const actions = duckFactory.getActionCreators();
+            const reducer = duckFactory.getReducer();
 
-            new DuckFactory("DKTST2", {hey: 5}, actions1);
+            const STATE = deepFreeze({hey: 37});
+            expect(STATE).to.deep.equal({hey: 37});
 
-            console.log("setHey:", actions1.setHey(42));
-            console.log("doubleHey:", actions1.doubleHey());
-            console.log("insertWhoaYeah:", actions1.insertWhoaYeah(6, 19));
+            let reduced = reducer(STATE, actions.setHey(42));
+            expect(reduced).to.deep.equal({hey: 42});
 
+            reduced = reducer(reduced, actions.doubleHey());
+            expect(reduced).to.deep.equal({hey: 84});
+
+            reduced = reducer(reduced, actions.insertWhoaYeah(6, 19));
+            expect(reduced).to.deep.equal({
+                hey: 84,
+                whoa: 6,
+                yeah: "Yeah 19",
+            });
         });
+    });
 
+    describe(".getTypes", ()=> {
+        it("exposes a map between the action creator name and the type of the action it creates", ()=>{
+            const duckFactory = new DuckFactory("duck/test3/", {}, {
+                setHey: (state, {ya}) => ({hey: ya}),
+                doubleHey: (state) => ({hey: state.hey * 2}),
+                insertWhoaYeah: (state, {whoa, yeah}) => {
+                    return {
+                        ...state,
+                        whoa: whoa,
+                        yeah: "Yeah " + yeah,
+                    };
+                },
+            }, true, true);
 
-        it("tolerates excessive number of action arguments, compared to the actionCreator actionArgumentNames", ()=>{
-
-            //const duckFactory3 = new DuckFactory("DKTST3", {}, true);
-        });//*/
+            const types = duckFactory.getTypes();
+            expect(types.setHey).to.equal("duck/test3/setHey");
+            expect(types.doubleHey).to.equal("duck/test3/doubleHey");
+            expect(types.insertWhoaYeah).to.equal("duck/test3/insertWhoaYeah");
+        });
     });
 });

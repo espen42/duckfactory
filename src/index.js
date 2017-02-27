@@ -66,7 +66,7 @@ const buildMaps = (prefix, actionAndReducerMap, checkAndWarn, logBuilt) => {
         }
 
         actionCreatorMap[actionName] = makeActionCreator(actionType, actionArgumentNames);
-        reducerMap[actionName] = reducerFunction;
+        reducerMap[actionType] = reducerFunction;
         typeMap[actionName] = actionType;
 
         if (logBuilt && window.console) {
