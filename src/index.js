@@ -2,6 +2,60 @@ import check from './check';
 
 import functionArgNames from './functionArgNames';
 
+
+// --------------------------------------------------------------------  General helpers
+
+
+
+let actionNum = 0;
+const getActionType = (prefix, actionName) =>
+(prefix != null ? prefix : "") +
+((actionName == null || actionName === "") ?
+    "" + (actionNum++) :
+    actionName);
+
+
+const makeActionCreator = (actionType, actionArgumentNames = []) => (...args) => {
+    const action = {type: actionType};
+    actionArgumentNames.forEach( (key, idx) => { action[key] = args[idx]; } );
+    console.log("New reducer action:", action);
+    return action;
+};
+
+
+
+const buildMaps = (prefix, actionAndReducerMap, checkAndWarn, logBuilt) => {
+    const actionCreatorMap = {};
+    const reducerMap = {};
+    const typeMap = {};
+
+    Object.keys(actionAndReducerMap).forEach( actionName => {
+
+        const actionType = getActionType(prefix, actionName);
+        let reducerFunction = actionAndReducerMap[actionName];
+        const actionArgumentNames = getReducerArgNames(reducerFunction, actionType) || [];
+
+        if (checkAndWarn) {
+            check(actionType, actionArgumentNames, reducerFunction);
+        }
+
+        actionCreatorMap[actionName] = makeActionCreator(actionType, actionArgumentNames);
+        reducerMap[actionType] = reducerFunction;
+        typeMap[actionName] = actionType;
+
+        if (logBuilt && window.console) {
+            console.log("\nActionCreator: getActionCreators()." + actionName + "(" + actionArgumentNames.join(", ") + ")");
+            console.log("\tType: getTypes()." + actionName + " = '" + actionType + "'");
+        }
+    });
+
+    return [actionCreatorMap, reducerMap, typeMap];
+};
+
+
+
+// -------------------------------------------------------------  Reducer-specific helpers
+
 const getReducerArgNames = (reducerFunc, actionType) => {
     if (reducerFunc != null) {
         const reducerArgs = functionArgNames.getArgs(reducerFunc);
@@ -23,7 +77,6 @@ const getReducerArgNames = (reducerFunc, actionType) => {
     }
 };
 
-
 export const makeReducer = (reducerTable, initialState) =>
     (state = initialState, action = {}) => {
         const reducer = reducerTable[action.type];
@@ -33,51 +86,10 @@ export const makeReducer = (reducerTable, initialState) =>
 
 
 
-let actionNum = 0;
-const getActionType = (prefix, actionName) =>
-    (prefix != null ? prefix : "") +
-    ((actionName == null || actionName === "") ?
-        "" + (actionNum++) :
-        actionName);
-
-
-const makeActionCreator = (actionType, actionArgumentNames = []) => (...args) => {
-    const action = {type: actionType};
-    actionArgumentNames.forEach( (key, idx) => { action[key] = args[idx]; } );
-    console.log("New reducer action:", action);
-    return action;
-};
 
 
 
-const buildMaps = (prefix, actionAndReducerMap, checkAndWarn, logBuilt) => {
-    const actionCreatorMap = {};
-    const reducerMap = {};
-    const typeMap = {};
-
-    Object.keys(actionAndReducerMap).forEach( actionName => {
-
-        const actionType = getActionType(prefix, actionName);
-        let reducerFunction = actionAndReducerMap[actionName];
-        const actionArgumentNames = getReducerArgNames(reducerFunction, actionName) || [];
-
-        if (checkAndWarn) {
-            check(actionType, actionArgumentNames, reducerFunction);
-        }
-
-        actionCreatorMap[actionName] = makeActionCreator(actionType, actionArgumentNames);
-        reducerMap[actionType] = reducerFunction;
-        typeMap[actionName] = actionType;
-
-        if (logBuilt && window.console) {
-            console.log("\nActionCreator: getActionCreators()." + actionName + "(" + actionArgumentNames.join(", ") + ")");
-            console.log("\tType: getTypes()." + actionName + " = '" + actionType + "'");
-        }
-    });
-
-    return [actionCreatorMap, reducerMap, typeMap];
-};
-
+//------------------------------------------------------------  Entry: class
 
 /**
  *  Creates an action-actioncreator-reducer unified complex: a redux duck.
