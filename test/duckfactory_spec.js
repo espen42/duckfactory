@@ -22,20 +22,22 @@ describe("DuckFactory", ()=>{
                 },
             }, true, true);
 
-            const action1 = duckFactory.getActionCreators().setHey(2, 42, 777);
+            const actions = duckFactory.getActionCreators();
+
+            const action1 = actions.setHey(2, 42, 777);
 
             expect(action1).to.deep.equal({
                 type: "duck/test1/setHey",
                 ya: 2,
             });
 
-            const action2 = duckFactory.getActionCreators().doubleHey(2, 42, 777);
+            const action2 = actions.doubleHey(2, 42, 777);
 
             expect(action2).to.deep.equal({
                 type: "duck/test1/doubleHey",
             });
 
-            const action3 = duckFactory.getActionCreators().insertSecondAndThirdAsWhoaYeah(2, 42, 777);
+            const action3 = actions.insertSecondAndThirdAsWhoaYeah(2, 42, 777);
 
             expect(action3).to.deep.equal({
                 type: "duck/test1/insertSecondAndThirdAsWhoaYeah",
