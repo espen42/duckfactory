@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import check from '../src/check';
+import check from '../lib/check';
 
 describe("check", ()=>{
 
