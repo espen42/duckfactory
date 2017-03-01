@@ -5,7 +5,7 @@ import DuckFactory from '../lib';
 
 
 
-describe("DuckFactory", ()=>{
+describe("duckfactory", ()=>{
     describe(".getActionCreators", ()=> {
         it("exposes an object with actions creators, corresponding to the keys in the object sent to the creator, " +
             "where the actioncreator's arguments are the reducer arguments", () => {
