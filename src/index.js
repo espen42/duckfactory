@@ -2,6 +2,7 @@ import check from './check';
 
 import functionArgNames from './functionArgNames';
 
+const canLog =  window && window.console;
 
 // --------------------------------------------------------------------  General helpers
 
@@ -15,10 +16,12 @@ const getActionType = (prefix, actionName) =>
     actionName);
 
 
-const makeActionCreator = (actionType, actionArgumentNames = []) => (...args) => {
+const makeActionCreator = (actionType, actionArgumentNames = [], logBuilt) => (...args) => {
     const action = {type: actionType};
     actionArgumentNames.forEach( (key, idx) => { action[key] = args[idx]; } );
-    console.log("New reducer action:", action);
+    if (logBuilt) {
+        console.log("New reducer action:", action);
+    }
     return action;
 };
 
@@ -39,13 +42,13 @@ const buildMaps = (prefix, actionAndReducerMap, checkAndWarn, logBuilt) => {
             check(actionType, actionArgumentNames, reducerFunction);
         }
 
-        actionCreatorMap[actionName] = makeActionCreator(actionType, actionArgumentNames);
+        actionCreatorMap[actionName] = makeActionCreator(actionType, actionArgumentNames, logBuilt);
         reducerMap[actionType] = reducerFunction;
         typeMap[actionName] = actionType;
 
-        if (logBuilt && window.console) {
-            console.log("\nActionCreator: getActionCreators()." + actionName + "(" + actionArgumentNames.join(", ") + ")");
-            console.log("\tType: getTypes()." + actionName + " = '" + actionType + "'");
+        if (logBuilt) {
+            console.log("\nReducer actionCreator: " + actionName + "(" + actionArgumentNames.join(", ") + ")   " +
+                "--->   type: '" + actionType + "'");
         }
     });
 
@@ -101,7 +104,7 @@ class DuckFactory {
         }
 
         const [actionCreatorMap, reducerMap, typeMap] = buildMaps(
-            actionTypePrefix, actionAndReducerMap, checkAndWarn, logBuilt);
+            actionTypePrefix, actionAndReducerMap, checkAndWarn, logBuilt && canLog);
 
         this._actionCreators = actionCreatorMap;
         this._reducer = makeReducer(reducerMap, initialState);
