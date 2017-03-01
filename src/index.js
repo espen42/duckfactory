@@ -15,10 +15,10 @@ const getActionType = (prefix, actionName) =>
     actionName);
 
 
-const makeActionCreator = (actionType, actionArgumentNames = []) => (...args) => {
+const makeActionCreator = (actionType, actionArgumentNames, logBuilt) => (...args) => {
     const action = {type: actionType};
     actionArgumentNames.forEach( (key, idx) => { action[key] = args[idx]; } );
-    console.log("New reducer action:", action);
+    if (logBuilt && window.console) { console.log("New reducer action:", action); }
     return action;
 };
 
@@ -39,7 +39,7 @@ const buildMaps = (prefix, actionAndReducerMap, checkAndWarn, logBuilt) => {
             check(actionType, actionArgumentNames, reducerFunction);
         }
 
-        actionCreatorMap[actionName] = makeActionCreator(actionType, actionArgumentNames);
+        actionCreatorMap[actionName] = makeActionCreator(actionType, actionArgumentNames, logBuilt);
         reducerMap[actionType] = reducerFunction;
         typeMap[actionName] = actionType;
 
@@ -75,6 +75,7 @@ const getReducerArgNames = (reducerFunc, actionType) => {
             }
         }
     }
+    return [];
 };
 
 export const makeReducer = (reducerTable, initialState) =>
