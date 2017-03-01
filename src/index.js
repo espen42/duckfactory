@@ -9,7 +9,7 @@ import functionArgNames from './functionArgNames';
 
 let actionNum = 0;
 const getActionType = (prefix, actionName) =>
-(prefix != null ? prefix : "") +
+(prefix ? prefix + "/" : "") +
 ((actionName == null || actionName === "") ?
     "" + (actionNum++) :
     actionName);
