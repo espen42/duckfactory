@@ -1,6 +1,13 @@
 import functionArgNames from './functionArgNames';
 
-const takenActionNames = new Set();
+
+if (window) {
+    if (!window.__takenActionNames__) {
+        window.__takenActionNames__ = new Set();
+    }
+}
+const takenActionNames = (window) ? window.__takenActionNames__ : new Set();
+
 const checkActionName = actionName => {
     if ((typeof actionName) !== 'string' && (typeof actionName) !== 'number') {
         throw Error("Action name can't be " + JSON.stringify(actionName) + " (" + typeof actionName + "). " +

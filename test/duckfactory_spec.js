@@ -223,6 +223,38 @@ describe("DuckFactory", ()=>{
             }).to.throw(Error);
 
         });
-    });
 
+        it("throws an error if all produced action types are not globally unique, " +
+            "even across different duckfactories", ()=>{
+            expect( ()=>{
+                new DuckFactory("this/is", {}, {
+                    unique: (state, {ya}) => ({hey: ya}),
+                }, true, true);
+
+                new DuckFactory("this/is", {}, {
+                    okay: (state, {ya}) => ({hey: ya}),
+                }, true, true);
+
+                new DuckFactory("this/is/also", {}, {
+                    unique: (state, {ya}) => ({hey: ya}),
+                }, true, true);
+
+                new DuckFactory("this/is/also", {}, {
+                    okay: (state, {ya}) => ({hey: ya}),
+                }, true, true);
+
+            }).to.not.throw(Error);
+
+            expect( ()=>{
+                new DuckFactory("this/is", {}, {
+                    notUnique: (state, {ya}) => ({hey: ya}),
+                }, true, true);
+
+                new DuckFactory("this/is", {}, {
+                    notUnique: (state, {ya}) => ({hey: ya}),
+                }, true, true);
+
+            }).to.throw(Error);
+        });
+    });
 });
