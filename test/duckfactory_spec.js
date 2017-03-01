@@ -102,9 +102,7 @@ describe("DuckFactory", ()=>{
             expect(types.doubleHey).to.equal("duck/test3/doubleHey");
             expect(types.insertWhoaYeah).to.equal("duck/test3/insertWhoaYeah");
         });
-    });
 
-    describe(".getTypes", ()=> {
         it("makes sure the actiontype is sensible if prefix is null", ()=>{
             const duckFactory = new DuckFactory(null, {}, {
                 setHeyGlobal1: (state, {ya}) => ({hey: ya}),
@@ -123,9 +121,7 @@ describe("DuckFactory", ()=>{
             expect(types.doubleHeyGlobal1).to.equal("doubleHeyGlobal1");
             expect(types.insertWhoaYeahGlobal1).to.equal("insertWhoaYeahGlobal1");
         });
-    });
 
-    describe(".getTypes", ()=> {
         it("makes sure the actiontype is sensible if prefix is en empty string", ()=>{
             const duckFactory = new DuckFactory("", {}, {
                 setHeyGlobal2: (state, {ya}) => ({hey: ya}),
@@ -143,6 +139,89 @@ describe("DuckFactory", ()=>{
             expect(types.setHeyGlobal2).to.equal("setHeyGlobal2");
             expect(types.doubleHeyGlobal2).to.equal("doubleHeyGlobal2");
             expect(types.insertWhoaYeahGlobal2).to.equal("insertWhoaYeahGlobal2");
+        });
+
+        it("makes sure the actiontype doesn't end up containing a double slash if prefix ends with a slash", ()=>{
+            const duckFactory = new DuckFactory("hey/", {}, {
+                setHey: (state, {ya}) => ({hey: ya}),
+                doubleHey: (state) => ({hey: state.hey * 2}),
+                insertWhoaYeah: (state, {whoa, yeah}) => {
+                    return {
+                        ...state,
+                        whoa: whoa,
+                        yeah: "Yeah " + yeah,
+                    };
+                },
+            }, true, true);
+
+            const types = duckFactory.getTypes();
+            expect(types.setHey).to.equal("hey/setHey");
+            expect(types.doubleHey).to.equal("hey/doubleHey");
+            expect(types.insertWhoaYeah).to.equal("hey/insertWhoaYeah");
+        });
+
+        it("makes sure the actiontype is sensible even if prefix is only a slash", ()=>{
+            const duckFactory = new DuckFactory("/", {}, {
+                setHeyGlobal3: (state, {ya}) => ({hey: ya}),
+                doubleHeyGlobal3: (state) => ({hey: state.hey * 2}),
+                insertWhoaYeahGlobal3: (state, {whoa, yeah}) => {
+                    return {
+                        ...state,
+                        whoa: whoa,
+                        yeah: "Yeah " + yeah,
+                    };
+                },
+            }, true, true);
+
+            const types = duckFactory.getTypes();
+            expect(types.setHeyGlobal3).to.equal("setHeyGlobal3");
+            expect(types.doubleHeyGlobal3).to.equal("doubleHeyGlobal3");
+            expect(types.insertWhoaYeahGlobal3).to.equal("insertWhoaYeahGlobal3");
+        });
+
+        it("rejects non-string prefixes (other than null/undefined)", ()=>{
+            expect( ()=>{
+                new DuckFactory({thisIs: "wrong"}, {}, {
+                    setHeyGlobal4: (state, {ya}) => ({hey: ya}),
+                    doubleHeyGlobal4: (state) => ({hey: state.hey * 2}),
+                    insertWhoaYeahGlobal4: (state, {whoa, yeah}) => {
+                        return {
+                            ...state,
+                            whoa: whoa,
+                            yeah: "Yeah " + yeah,
+                        };
+                    },
+                }, true, true);
+            }).to.throw(Error);
+
+            expect( ()=>{
+                new DuckFactory(["also", "bad"], {}, {
+                    setHeyGlobal5: (state, {ya}) => ({hey: ya}),
+                    doubleHeyGlobal5: (state) => ({hey: state.hey * 2}),
+                    insertWhoaYeahGlobal5: (state, {whoa, yeah}) => {
+                        return {
+                            ...state,
+                            whoa: whoa,
+                            yeah: "Yeah " + yeah,
+                        };
+                    },
+                }, true, true);
+            }).to.throw(Error);
+
+            expect( ()=>{
+                new DuckFactory(840, {}, {
+                    setHeyGlobal6: (state, {ya}) => ({hey: ya}),
+                    doubleHeyGlobal6: (state) => ({hey: state.hey * 2}),
+                    insertWhoaYeahGlobal6: (state, {whoa, yeah}) => {
+                        return {
+                            ...state,
+                            whoa: whoa,
+                            yeah: "Yeah " + yeah,
+                        };
+                    },
+                }, true, true);
+            }).to.throw(Error);
+
         });
     });
 
