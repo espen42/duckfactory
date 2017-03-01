@@ -47,7 +47,7 @@ const buildMaps = (prefix, actionAndReducerMap, checkAndWarn, logBuilt) => {
         typeMap[actionName] = actionType;
 
         if (logBuilt) {
-            console.log("\nReducer actionCreator: " + actionName + "(" + actionArgumentNames.join(", ") + ")   " +
+            console.log("Reducer actionCreator: " + actionName + "(" + actionArgumentNames.join(", ") + ")   " +
                 "--->   type: '" + actionType + "'");
         }
     });
