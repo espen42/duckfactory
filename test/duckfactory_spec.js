@@ -7,12 +7,20 @@ import DuckFactory from '../lib';
 
 describe("duckfactory", ()=>{
     describe(".getActionCreators", ()=> {
+    
+        /** The first argument of the reducer function will be treated as the incoming state in the reducer, and will
+         *  therefore be ignored by the action creator.
+         *
+         *  The basic syntax is to provide the first state argument, and a second argument that is a destructured object
+         *  as demonstrated here. The content of the destructured object will be the arguments of the action creator:
+         */
         it("exposes an object with actions creators, corresponding to the keys in the object sent to the creator, " +
-            "where the actioncreator's arguments are the reducer arguments", () => {
+            "where the actioncreator's arguments are the reducer function's second argument object, destructured", () => {
+            
             const duckFactory = new DuckFactory("duck/test1", {}, {
                 setHey: (state, {ya}) => ({hey: ya}),
                 doubleHey: (state) => ({hey: state.hey * 2}),
-                insertSecondAndThirdAsWhoaYeah: (state, {first, second, third}) => {
+                insertSecondAndThirdAsWhoaYeah: (state, {first, second, third}) => {    // Note that while first, second and third become the three direct arguments for the action creator below, the {first, second, third} object is ONE argument in the definition here.
                     return {
                         ...state,
                         hey: first,
@@ -24,27 +32,140 @@ describe("duckfactory", ()=>{
 
             const actions = duckFactory.getActionCreators();
 
-            const action1 = actions.setHey(2, 42, 777);
 
-            expect(action1).to.deep.equal({
+
+            expect( actions.setHey(2, 42, 777) ).to.deep.equal({
                 type: "duck/test1/setHey",
                 ya: 2,
             });
 
-            const action2 = actions.doubleHey(2, 42, 777);
-
-            expect(action2).to.deep.equal({
+            expect( actions.doubleHey(2, 42, 777) ).to.deep.equal({
                 type: "duck/test1/doubleHey",
             });
 
-            const action3 = actions.insertSecondAndThirdAsWhoaYeah(2, 42, 777);
-
-            expect(action3).to.deep.equal({
+            expect( actions.insertSecondAndThirdAsWhoaYeah(2, 42, 777) ).to.deep.equal({
                 type: "duck/test1/insertSecondAndThirdAsWhoaYeah",
                 first: 2,
                 second: 42,
                 third: 777,
             });
+            
+            
+
+            expect( actions.setHey() ).to.deep.equal({
+                type: "duck/test1/setHey",
+                ya: undefined,
+            });
+
+            expect( actions.doubleHey() ).to.deep.equal({
+                type: "duck/test1/doubleHey",
+            });
+
+            expect( actions.insertSecondAndThirdAsWhoaYeah() ).to.deep.equal({
+                type: "duck/test1/insertSecondAndThirdAsWhoaYeah",
+                first: undefined,
+                second: undefined,
+                third: undefined,
+            });
+        });
+        
+        // If the reducer function has no second object (or even no first), the action creator will not take any args
+        // (or more specifically; will ignore any args) and the action will only carry the action type.
+        it("creates a nullary action creator if there is no second argument in the reducer function", ()=>{
+            const duckFactory = new DuckFactory("duck/testNullary", {}, {
+                            onlyState: (state) => ({...state, nothing: "addedtonothing"}),
+                            notEvenState: () => ({nothing: "willcomefromnothingohokaythen"}),
+                        }, true, true);
+                        
+            const actions = duckFactory.getActionCreators();
+
+            expect(actions.onlyState()).to.deep.equal({
+                type: "duck/testNullary/onlyState",
+            });
+            
+            expect(actions.onlyState(42)).to.deep.equal({
+                type: "duck/testNullary/onlyState",
+            });
+            
+
+            expect(actions.notEvenState()).to.deep.equal({
+                type: "duck/testNullary/notEvenState",
+            });
+            
+            expect(actions.notEvenState(42)).to.deep.equal({
+                type: "duck/testNullary/notEvenState",
+            });
+            
+        });
+        
+        
+        
+        /** If the reducer function has a second object but it's NOT a deconstructed object, the action creator will be
+         *  more generic: it will treat the second argument as the entire action object coming in to the reducer.
+         *
+         *  While it will therefore be preferable if the second argument is called 'action' to make that clear, the
+         *  name won't actually matter as long as it's consistently used in the reducer function.
+         *
+         *  The argument sent in to the action creator will be expected to be an object, which won't have any 'type' key
+         *  but can otherwise have any shape - the action object will simply be the argument object with...
+         *
+         *     type: <actionType>
+         *
+         *  ...added. Handling the content with then be completely up to the reducer.
+         */
+        it("creates a generic action creator if the second argument of the reducer function is not a deconstructed " +
+            "object", ()=>{
+            const duckFactory = new DuckFactory("duck/testGeneric", {}, {
+                takeAction: (state, action) => ({
+                    ...state,
+                    hey: action.hey,
+                    inside: action.inside,
+                }),
+            }, true, true);
+                                
+            const actions = duckFactory.getActionCreators();
+
+            expect(actions.takeAction()).to.deep.equal({
+                type: "duck/testGeneric/takeAction",
+            });
+            
+            expect(actions.takeAction({ hey: 45, inside: "suchagreatgame", ignored: "bythereducer" })).to.deep.equal({
+                type: "duck/testGeneric/takeAction",
+                hey: 45,
+                inside: "suchagreatgame",
+                ignored: "bythereducer"
+            });
+            
+            expect(actions.takeAction({
+                completely: "different",
+                arguments: "but",
+                thatt: "only",
+                matters: "to",
+                the: "reducer",
+                so: "the",
+                actioncreator: "is",
+                fine: "withthis"
+            })).to.deep.equal({
+                type: "duck/testGeneric/takeAction",
+                completely: "different",
+                arguments: "but",
+                thatt: "only",
+                matters: "to",
+                the: "reducer",
+                so: "the",
+                actioncreator: "is",
+                fine: "withthis"
+            });
+            
+            expect( () => { return actions.setNothing(666); }).to.throw(Error);  // Fails because the action creator needs an object argument, not a number
+            expect( () => { return actions.setNothing("nope"); }).to.throw(Error);  // Fails because the action creator needs an object argument, not a string, etc
+            expect( () => { return actions.setNothing({ type: "nonono" }); }).to.throw(Error);  // Fails because the object can't have a 'type' key - it's reserved for redux.
+        });
+        
+        
+        // If the reducer function has no second object (or even no first), the action creator will not take any args.
+        it("whatever the second argument is (shaped like), any arguments beyond that will NOT be carried ", ()=>{
+        
         });
     });
 

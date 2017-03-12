@@ -6,9 +6,9 @@
   "scripts": {
     "compile": "rimraf lib/* && babel src -d lib",
     "prepublish": "npm run checkall",
-    "test": "NODE_PATH=./ mocha --compilers js:babel-core/register --require babel-polyfill --require test/test_helper.js \"test/**/*@(.js)\"",
+    "test": "npm run compile && NODE_PATH=./ mocha --compilers js:babel-core/register --require babel-polyfill --require test/test_helper.js \"test/**/*@(.js)\"",
     "eslint": "eslint ./*.js src/ test/",
-    "checkall": "npm run eslint && npm run compile && npm run test"
+    "checkall": "npm run eslint && npm run test"
   },
   "repository": {
     "type": "git",
