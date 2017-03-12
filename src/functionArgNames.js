@@ -19,8 +19,11 @@ const getFunctionArgNames = (func) => {
  *  (e.g. for the function a = (b, c) => {}
   */
 const getFunctionRefsNames = (func, ref) => {
+    console.log("func:", func.toString);
+    console.log("ref:", JSON.stringify(ref));
     const pattern = new RegExp(ref + "\\.([a-zA-Z0-9_]+)[\\,\\;]", 'g');
     const args = func.toString().match(pattern);
+    console.log("args:", JSON.stringify(args));
     return args && args.map( arg => arg.slice(ref.length + 1, arg.length - 1));
 };
 
