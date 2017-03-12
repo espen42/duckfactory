@@ -20,7 +20,8 @@ describe("duckfactory", ()=>{
             const duckFactory = new DuckFactory("duck/test1", {}, {
                 setHey: (state, {ya}) => ({hey: ya}),
                 doubleHey: (state) => ({hey: state.hey * 2}),
-                insertSecondAndThirdAsWhoaYeah: (state, {first, second, third}) => {    // Note that while first, second and third become the three direct arguments for the action creator below, the {first, second, third} object is ONE argument in the definition here.
+                // Note that while first, second and third become the three direct arguments for the action creator below, the {first, second, third} object is ONE argument in the definition here.
+                insertSecondAndThirdAsWhoaYeah: (state, {first, second, third}) => {
                     return {
                         ...state,
                         hey: first,
@@ -163,46 +164,120 @@ describe("duckfactory", ()=>{
         });
         
         
-        // If the reducer function has no second object (or even no first), the action creator will not take any args.
-        it("whatever the second argument is (shaped like), any arguments beyond that will NOT be carried ", ()=>{
-        
-        });
+        // If the reducer function definition has a second argument and then more after that, the third and rest of them will be ignored by the action creator
+        it("will not carry any arguments beyond the second one (no matter if the second one is a deconstructed object " +
+            "or just an ordinary, generic one)", ()=>{
+	        const duckFactory = new DuckFactory("duck/testSurplus", {}, {
+	            insertWhoaYeah: (state, {whoa, yeah}, ignorable) => ({
+	                ...state,
+	                whoa: whoa,
+	                yeah: "Yeah " + yeah,
+	            }),
+	            
+	            generic: (state, action, nevermind) => ({
+	                ...state,
+	                whoa: action.whoa,
+	                yeah: "Yeah " + action.yeah,
+	            }),
+	        }, true, true);
+	        
+	        
+	
+	        expect( actions.insertWhoaYeah(2, 42) ).to.deep.equal({
+	            type: "duck/testSurplus/insertWhoaYeah",
+	            whoa: 2,
+	            yeah: 42,
+	        });
+	        
+	        expect( actions.insertWhoaYeah(2, 42, 1234) ).to.deep.equal({
+	            type: "duck/testSurplus/insertWhoaYeah",
+	            whoa: 2,
+	            yeah: 42,
+	        });
+	        
+	        expect( actions.generic({oki: 2, doki: 42}) ).to.deep.equal({
+	            type: "duck/testSurplus/generic",
+	            oki: 2,
+	            doki: 42,
+	        });
+	        
+	        expect( actions.generic({oki: 2, doki: 42}, {poky: 1234}) ).to.deep.equal({
+	            type: "duck/testSurplus/generic",
+	            whoa: 2,
+	            yeah: 42,
+	        });
+	        expect( actions.generic({oki: 2, doki: 42}, "smoky") ).to.deep.equal({
+	            type: "duck/testSurplus/generic",
+	            whoa: 2,
+	            yeah: 42,
+	        });
+	       
+	    });
     });
 
     describe(".getReducers", ()=>{
         it("Takes input action map ( actionName --> reducerFunction ) and exposes a working reducer", ()=>{
             const duckFactory = new DuckFactory("duck/test2", {}, {
                 setHey: (state, {ya}) => ({hey: ya}),
+                
                 doubleHey: (state) => ({hey: state.hey * 2}),
-                insertWhoaYeah: (state, {whoa, yeah}) => {
-                    return {
-                        ...state,
-                        whoa: whoa,
-                        yeah: "Yeah " + yeah,
-                    };
-                },
+                
+                insertWhoaYeah: (state, {whoa, yeah}) => ({
+                    ...state,
+                    whoa: whoa,
+                    yeah: "Yeah " + yeah,
+                }),
+                
+                notEvenState: () => ({ wasReset: true }),
+                
+                generic: (state, action) => ({
+                    ...state,
+                    whoa: action.whoa,
+                    yeah: "Yeah " + action.yeah,
+                    
+                }),
             }, true, true);
-
-            const actions = duckFactory.getActionCreators();
+		
+            const actions = duckFactory.getActionCreators();                // Examples of resulting actions below:
             const reducer = duckFactory.getReducer();
 
             const STATE = deepFreeze({hey: 37});
-            expect(STATE).to.deep.equal({hey: 37});
 
-            let reduced = reducer(STATE, actions.setHey(42));
+            let reduced = reducer(STATE, actions.setHey(42) );               // action: {type: 'duck/test2/setHey', ya: 42}
             expect(reduced).to.deep.equal({hey: 42});
 
-            reduced = reducer(reduced, actions.doubleHey());
+            reduced = reducer(reduced, actions.doubleHey() );                // action: {type: 'duck/test2/doubleHey'}
             expect(reduced).to.deep.equal({hey: 84});
 
-            reduced = reducer(reduced, actions.insertWhoaYeah(6, 19));
+            reduced = reducer(reduced, actions.insertWhoaYeah(6, 19) );     // {type: 'duck/test2/insertWhoaYeah', whoa: 6, yeah: 19}
             expect(reduced).to.deep.equal({
                 hey: 84,
                 whoa: 6,
                 yeah: "Yeah 19",
             });
+            
+            reduced = reducer(reduced, actions.notEvenState() );            // {type: 'duck/test2/notEvenState'}
+            expect(reduced).to.deep.equal({
+                wasReset: true,
+            });
+            
+            reduced = reducer(reduced, actions.generic( {some: "new", irrelevant: "content"}) );   // {type: 'duck/test2/generic', some: "new", irrelevant: "content"}
+            expect(reduced).to.deep.equal({
+                wasReset: true,
+                whoa: undefined,
+                yeah: "Yeah undefined",
+            });
+            
+            reduced = reducer(reduced, actions.generic( {whoa: "much", yeah: "better"}) );   // {type: 'duck/test2/generic', whoa: "much", yeah: "better"}
+            expect(reduced).to.deep.equal({
+                wasReset: true,
+                whoa: "much",
+                yeah: "Yeah better",
+            });
         });
     });
+
+
 
     describe(".getTypes", ()=> {
         it("exposes a map between the action creator name and the type of the action it creates", ()=>{
