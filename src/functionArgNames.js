@@ -38,9 +38,14 @@ const getFunctionRefsNames = (func, ref) => {
     const singledOutBody = singledOutIntro[0];
 
     // Keeps all instances of "X = <ref>.X", and makes and returns a list of all X'es.
-    const pattern = new RegExp("([a-zA-Z0-9_]+?) ?= ?" + ref + "\\.\\1", 'g');
-    const args = singledOutBody.match(pattern);
-    return args && args.map( arg => arg.split("=")[0].trim());
+    const pattern = new RegExp("([a-zA-Z0-9_]+?) ?= ?" + ref + "\\.([a-zA-Z0-9_]+)[\\,\\;]?", 'g');
+    const matches = singledOutBody.match(pattern);
+    return matches && matches.map( arg => arg
+        .split("=")[1].trim()
+        .split(".")[1]
+        .split(",")[0]
+        .split(";")[0]
+    );
 };
 
 export default {
