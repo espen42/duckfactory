@@ -203,13 +203,13 @@ describe("duckfactory", ()=>{
 	        
 	        expect( actions.generic({oki: 2, doki: 42}, {poky: 1234}) ).to.deep.equal({
 	            type: "duck/testSurplus/generic",
-	            whoa: 2,
-	            yeah: 42,
+                oki: 2,
+                doki: 42,
 	        });
 	        expect( actions.generic({oki: 2, doki: 42}, "smoky") ).to.deep.equal({
 	            type: "duck/testSurplus/generic",
-	            whoa: 2,
-	            yeah: 42,
+                oki: 2,
+                doki: 42,
 	        });
 	       
 	    });

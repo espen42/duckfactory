@@ -34,13 +34,41 @@ const getActionType = (prefix, actionName) =>
 
 
 
-const makeActionCreator = (actionType, actionArgumentNames = [], logBuilt) => (...args) => {
+const makeActionCreator = (actionType, actionArgumentNames = [], checkAndLog, logBuilt) => {
     const action = {type: actionType};
-    actionArgumentNames.forEach( (key, idx) => { action[key] = args[idx]; } );
-    if (logBuilt) {
-        console.log("New reducer action:", action);
+
+    if (typeof actionArgumentNames === 'string') {
+        return (arg) => {
+            if (checkAndLog) {
+                if (arg == null) {
+                    console.warn("The generic action '" + actionType + "' is expected to be created with an argument object, not:",
+                       JSON.stringify(arg), " - Creating empty action:", action);
+                    return action;
+
+                } else if (typeof arg !== 'object' || Array.isArray(arg)) {
+                    throw Error("The generic action '" + actionType + "' is expected to be created with an argument object, not: " +
+                        JSON.stringify(arg) + ". Aborting.");
+                }
+            }
+
+            const newAction = { ...action, ...arg };
+
+            if (logBuilt) {
+                console.log("New generic reducer action:", newAction);
+            }
+
+            return newAction;
+        }
+
+    } else {
+        return (...args) => {
+            actionArgumentNames.forEach( (key, idx) => { action[key] = args[idx]; } );
+            if (logBuilt) {
+                console.log("New reducer action:", action);
+            }
+            return action;
+        };
     }
-    return action;
 };
 
 
@@ -60,13 +88,19 @@ const buildMaps = (prefix, actionAndReducerMap, checkAndWarn, logBuilt) => {
             check(actionType, reducerFunction);
         }
 
-        actionCreatorMap[actionName] = makeActionCreator(actionType, actionArgumentNames, logBuilt);
+        actionCreatorMap[actionName] = makeActionCreator(actionType, actionArgumentNames, checkAndWarn, logBuilt);
         reducerMap[actionType] = reducerFunction;
         typeMap[actionName] = actionType;
 
         if (logBuilt) {
-            console.log("Reducer actionCreator: " + actionName + "(" + actionArgumentNames.join(", ") + ")   " +
-                "--->   type: '" + actionType + "'");
+            if (typeof actionArgumentNames === 'string') {
+                console.log("Generic reducer actionCreator: " + actionName + "(" + actionArgumentNames + ")   " +
+                    "--->   type: '" + actionType + "'");
+
+            } else {
+                console.log("Reducer actionCreator: " + actionName + "(" + actionArgumentNames.join(", ") + ")   " +
+                    "--->   type: '" + actionType + "'");
+            }
         }
     });
 
@@ -80,22 +114,15 @@ const buildMaps = (prefix, actionAndReducerMap, checkAndWarn, logBuilt) => {
 const getReducerArgNames = (reducerFunc, actionType) => {
     if (reducerFunc != null) {
         const reducerArgs = functionArgNames.getArgs(reducerFunc);
-
-        if (reducerArgs.length > 1) {
+        if (reducerArgs && reducerArgs.length > 1) {
             const secondArg = reducerArgs[1];
-            if (secondArg.substr(0, 4) === "_ref") {
-                const refArgs = functionArgNames.getRefs(reducerFunc, secondArg);
-                if (refArgs == null) {
-                    console.warn("Possible flaw in duck action '" + actionType +
-                        "': the reducer function expects a deconstructed object ( e.g. {name1, name2, name3} ) as its " +
-                        "second argument, but this seems empty");
 
-                }
-                return refArgs || [];
+            const refArgs = functionArgNames.getRefs(reducerFunc, secondArg);
 
-            }
+            return refArgs || reducerArgs[1];
         }
     }
+    return [];
 };
 
 export const makeReducer = (reducerTable, initialState) =>
