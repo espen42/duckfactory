@@ -180,9 +180,9 @@ describe("duckfactory", ()=>{
 	                yeah: "Yeah " + action.yeah,
 	            }),
 	        }, true, true);
-	        
-	        
-	
+
+            const actions = duckFactory.getActionCreators();
+
 	        expect( actions.insertWhoaYeah(2, 42) ).to.deep.equal({
 	            type: "duck/testSurplus/insertWhoaYeah",
 	            whoa: 2,

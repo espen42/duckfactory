@@ -6,67 +6,46 @@ describe("check", ()=>{
 
     describe(".reducerDuck checks a reducer duck (creation of a reducer-oriented action)", ()=>{
 
-        // It returns true iff all these conditions are true:
-        // 1. the reducerFunction:
-        //      - has a first state argument, AND
-        //      - has no second argument OR the second argument is action OR the second argument is a deconstructed object, AND
-        // 2. the actionArgumentNames array:
-        //      - contains at least the arguments that are in a deconstructed second reducer argument, AND
-        //      - contains no duplicate names, AND
-        //      - contains only valid argument names, AND
-        //      - doesn't contain the argument name 'type', which is reserved
         it("asserts the actionCreators during the creation", ()=> {
-            expect(check(
+            expect( ()=>{check(
                 "ACTION1",
-                ["woop", "wheee", "ohyes"],
+                () => {
+                    console.log("Awright");
+                }
+            )}).to.not.throw(Error);  // But it will log a warning.
+
+            expect(()=>{check(
+                "ACTION2",
                 (state) => {
                     console.log("Awright");
                 }
-            )).to.equal(true);
+            )}).to.not.throw(Error); // No problem.
 
-            expect(check(
-                "ACTION2",
-                ["woop", "wheee", "ohyes"],
-                (state, action)=>{ console.log("Awright"); },
-            )).to.equal(true);
-
-
-
-            expect(check(
+            expect(()=>{check(
                 "ACTION3",
-                ["woop", "wheee", "ohyes"],
-                (state, {woop, wheee, ohyes}) => {
-                    console.log("Awright");
-                },
-            )).to.equal(true);
+                (state, action)=>{ console.log("Awright"); },
+            )}).to.not.throw(Error);
 
-            // It's happy as long as the reducers's action at least gets the arguments it needs
-            expect(check(
+            expect(()=>{check(
                 "ACTION4",
-                ["woop", "wheee", "ohyes", "excessive", "superfluous", "redundant", "unused"],
-                (state, {woop, wheee, ohyes}) => {
+                (state, {woop, wheee, ohyes}) => { console.log("Awright"); },
+            )}).to.not.throw(Error); // No problem, a second destructured object argument is the syntax of choice.
+
+            expect(()=>{check(
+                "ACTION5",
+                (state, {woop, wheee, type}) => {
                     console.log("Awright");
                 },
-            )).to.equal(true);
+            )}).to.throw(Error); // Whoa there, can't call an action creator argument 'type'.
+
+
+            expect(()=>{check(
+                "ACTION1",
+                (state, {woop, wheee, ohyes}) => { console.log("Awright"); },
+            )}).to.throw(Error); // Oh no you don't, there's already been spotted an action called "ACTION1".
+
         });
 
-        it("warns (returns false) if the reducer is missing a state argument", ()=>{
-            expect(check(
-                "ACTION5",
-                ["woop", "wheee", "ohyes"],
-                ()=>{ console.log("Awright"); },
-            )).to.equal(false);
-        });
-
-        it("throws an error if the argument name list contains the name 'type', since that's reserved", ()=>{
-            expect( ()=>{
-                check(
-                    "ACTION13",
-                    ["woop", "good1", "type"],
-                    (state, {woop, good1, type})=>{ console.log("Awright"); },
-                );
-            } ).to.throw(Error);
-        });
     });
 
 });

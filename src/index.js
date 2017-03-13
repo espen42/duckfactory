@@ -57,7 +57,7 @@ const buildMaps = (prefix, actionAndReducerMap, checkAndWarn, logBuilt) => {
         const actionArgumentNames = getReducerArgNames(reducerFunction, actionType) || [];
 
         if (checkAndWarn) {
-            check(actionType, actionArgumentNames, reducerFunction);
+            check(actionType, reducerFunction);
         }
 
         actionCreatorMap[actionName] = makeActionCreator(actionType, actionArgumentNames, logBuilt);
