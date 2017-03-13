@@ -9,9 +9,9 @@ if (window) {
 const takenActionNames = (window) ? window.__takenActionNames__ : new Set();
 
 const checkActionName = actionName => {
-    if ((typeof actionName) !== 'string' && (typeof actionName) !== 'number') {
+    if ((typeof actionName) !== 'string') {
         throw Error("Action name can't be " + JSON.stringify(actionName) + " (" + typeof actionName + "). " +
-            "Only strings or numbers are allowed.");
+            "Only strings allowed.");
     }
     if (takenActionNames.has(actionName)) {
         throw Error("Action name " + JSON.stringify(actionName) + " is already taken. Action names must be unique. " +
@@ -36,28 +36,27 @@ export default (actionType, actionArgumentNames = [], func) => {
 
     if (func != null) {
         const reducerArgs = functionArgNames.getArgs(func);
-
-        checkActionArgumentNames(actionArgumentNames, actionType);
-
-        if (reducerArgs[0] != "state") {
-            console.warn("Possibly flawed action '" + actionType +
-                "': the reducer function should take state as its first argument");
+        if (reducerArgs.length === 0) {
+            console.warn("The action '" + actionType + "' triggers a nullary reducer function. Without state as its " +
+                "first argument, note that this reducer will always erase any previous state instead of modifying it");
             healthy = false;
-        }
 
-        if (reducerArgs.length > 1) {
-            if (reducerArgs[1].substr(0,4) === "_ref") {
-                const refArgs = functionArgNames.getRefs(func, reducerArgs[1]);
-                if (refArgs == null) {
-                    console.warn("Possibly flawed action '" + actionType +
-                        "': the reducer function expects a deconstructed object (eg. {name1, name2, name3} ) " +
-                        "as its second argument, but this seems empty");
-                    healthy = false;
+        } else if (reducerArgs.length > 1) {
+            const refArgs = functionArgNames.getRefs(func, reducerArgs[1]);
+            console.log("Action "+actionType+": refArgs =",refArgs);
 
-                }
+            if (refArgs == null) {
+                console.warn("Possibly flawed action '" + actionType +
+                    "': the reducer function expects a deconstructed object (eg. {name1, name2, name3} ) " +
+                    "as its second argument, but this seems empty");
+                healthy = false;
 
+            } else {
+                checkActionArgumentNames(refArgs, actionType);
             }
+
         }
+
     }
 
     return healthy;

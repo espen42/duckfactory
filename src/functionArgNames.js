@@ -19,12 +19,28 @@ const getFunctionArgNames = (func) => {
  *  (e.g. for the function a = (b, c) => {}
   */
 const getFunctionRefsNames = (func, ref) => {
-    console.log("func:", func.toString);
-    console.log("ref:", JSON.stringify(ref));
-    const pattern = new RegExp(ref + "\\.([a-zA-Z0-9_]+)[\\,\\;]", 'g');
-    const args = func.toString().match(pattern);
-    console.log("args:", JSON.stringify(args));
-    return args && args.map( arg => arg.slice(ref.length + 1, arg.length - 1));
+    const funcStr = func.toString();
+
+    // Isolates and removes the intro, expecting "function <name>(<variables>) { var" or returning null
+    const prePattern = new RegExp("function .*? ?\\(.*?\\)\\s*\\{\\s*var ", 'g');
+    const promisingIntro = funcStr.match(prePattern);
+    if (promisingIntro == null || promisingIntro.length === 0) {
+        return null;
+    }
+    const promisingBody = funcStr.substr(promisingIntro[0].length);
+
+    // Isolates and keeps everything before the first semicolon or closing curly bracket, or returning null
+    const postPattern = new RegExp("[\\s\\S]*?[;\\}]", 'g');
+    const singledOutIntro = promisingBody.match(postPattern);
+    if (singledOutIntro == null || singledOutIntro.length === 0) {
+        return null;
+    }
+    const singledOutBody = singledOutIntro[0];
+
+    // Keeps all instances of "X = <ref>.X", and makes and returns a list of all X'es.
+    const pattern = new RegExp("([a-zA-Z0-9_]+?) ?= ?" + ref + "\\.\\1", 'g');
+    const args = singledOutBody.match(pattern);
+    return args && args.map( arg => arg.split("=")[0].trim());
 };
 
 export default {
