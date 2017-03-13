@@ -29,9 +29,7 @@ const checkActionArgumentNames = (actionArgumentNames, actionType) => {
     });
 };
 
-export default (actionType, actionArgumentNames = [], func) => {
-    let healthy = true;
-
+export default (actionType, func) => {
     checkActionName(actionType);
 
     if (func != null) {
@@ -39,38 +37,17 @@ export default (actionType, actionArgumentNames = [], func) => {
         if (reducerArgs.length === 0) {
             console.warn("The action '" + actionType + "' triggers a nullary reducer function. Without state as its " +
                 "first argument, note that this reducer will always erase any previous state instead of modifying it");
-            healthy = false;
 
         } else if (reducerArgs.length > 1) {
             const refArgs = functionArgNames.getRefs(func, reducerArgs[1]);
-            console.log("Action "+actionType+": refArgs =",refArgs);
+            //console.log("Action "+actionType+": refArgs =",refArgs);
 
-            if (refArgs == null) {
-                console.warn("Possibly flawed action '" + actionType +
-                    "': the reducer function expects a deconstructed object (eg. {name1, name2, name3} ) " +
-                    "as its second argument, but this seems empty");
-                healthy = false;
-
-            } else {
+            if (refArgs != null) {
                 checkActionArgumentNames(refArgs, actionType);
             }
 
         }
 
     }
-
-    return healthy;
 };
 
-/*
-    Check for non-deconstructed action argument?
-
- } else if (reducerArgs[1] !== "action") {
- console.warn("Possibly flawed reducer for action " + actionType +
- ": the " + funcType + " expected 'action' as the name of its " + nth + " argument");
- healthy = false;
- }
- }
- }
-
- //*/
