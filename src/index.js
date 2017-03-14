@@ -58,7 +58,7 @@ const makeActionCreator = (actionType, actionArgumentNames = [], checkAndLog, lo
             }
 
             return newAction;
-        }
+        };
 
     } else {
         return (...args) => {

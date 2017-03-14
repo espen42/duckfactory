@@ -25,7 +25,7 @@ describe("functionArgNames", ()=>{
             const testFunc1 = (one, two) => { console.log("Nothing much here"); };
             const testFunc2 = (one, {two}) => { console.log("even less here"); };
             const testFunc3 = (one, {two, three, four}) => { console.log("even less here"); };
-            const testFunc4 = (one, {}) => { console.log("even less here"); };
+            const testFunc4 = (one) => { console.log("even less here"); };
 
             const getRefs = fargn.getRefs;
 
