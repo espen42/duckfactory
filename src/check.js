@@ -1,6 +1,3 @@
-import functionArgNames from './functionArgNames';
-
-
 if (window) {
     if (!window.__takenActionNames__) {
         window.__takenActionNames__ = new Set();
@@ -29,25 +26,11 @@ const checkActionArgumentNames = (actionArgumentNames, actionType) => {
     });
 };
 
-export default (actionType, func) => {
+export default (func, actionType, actionFields) => {
     checkActionName(actionType);
 
-    if (func != null) {
-        const reducerArgs = functionArgNames.getArgs(func);
-        if (reducerArgs.length === 0) {
-            console.warn("The action '" + actionType + "' triggers a nullary reducer function. Without state as its " +
-                "first argument, note that this reducer will always erase any previous state instead of modifying it");
-
-        } else if (reducerArgs.length > 1) {
-            const refArgs = functionArgNames.getRefs(func, reducerArgs[1]);
-            //console.log("Action "+actionType+": refArgs =",refArgs);
-
-            if (refArgs != null) {
-                checkActionArgumentNames(refArgs, actionType);
-            }
-
-        }
-
+    if (actionFields != null) {
+        checkActionArgumentNames(actionFields, actionType);
     }
 };
 

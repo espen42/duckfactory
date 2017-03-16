@@ -1,6 +1,6 @@
 import check from './check';
 
-import functionArgNames from './functionArgNames';
+import getActionFields from './actionFields';
 
 const canLog =  window && window.console;
 
@@ -81,24 +81,24 @@ const buildMaps = (prefix, actionAndReducerMap, checkAndWarn, logBuilt) => {
     Object.keys(actionAndReducerMap).forEach( actionName => {
 
         const actionType = getActionType(prefix, actionName);
-        let reducerFunction = actionAndReducerMap[actionName];
-        const actionArgumentNames = getReducerArgNames(reducerFunction, actionType) || [];
+        const reducerFunction = actionAndReducerMap[actionName];
+        const actionFields = getReducerActionFields(reducerFunction, actionType);
 
         if (checkAndWarn) {
-            check(actionType, reducerFunction);
+            check(reducerFunction, actionType, actionFields);
         }
 
-        actionCreatorMap[actionName] = makeActionCreator(actionType, actionArgumentNames, checkAndWarn, logBuilt);
+        actionCreatorMap[actionName] = makeActionCreator(actionType, actionFields, checkAndWarn, logBuilt);
         reducerMap[actionType] = reducerFunction;
         typeMap[actionName] = actionType;
 
         if (logBuilt) {
-            if (typeof actionArgumentNames === 'string') {
-                console.log("Generic reducer actionCreator: " + actionName + "(" + actionArgumentNames + ")   " +
+            if (typeof actionFields === 'string') {
+                console.log("Generic reducer actionCreator: " + actionName + "(" + actionFields + ")   " +
                     "--->   type: '" + actionType + "'");
 
             } else {
-                console.log("Reducer actionCreator: " + actionName + "(" + actionArgumentNames.join(", ") + ")   " +
+                console.log("Reducer actionCreator: " + actionName + "(" + actionFields.join(", ") + ")   " +
                     "--->   type: '" + actionType + "'");
             }
         }
@@ -111,18 +111,10 @@ const buildMaps = (prefix, actionAndReducerMap, checkAndWarn, logBuilt) => {
 
 // -------------------------------------------------------------  Reducer-specific helpers
 
-const getReducerArgNames = (reducerFunc, actionType) => {
-    if (reducerFunc != null) {
-        const reducerArgs = functionArgNames.getArgs(reducerFunc);
-        if (reducerArgs && reducerArgs.length > 1) {
-            const secondArg = reducerArgs[1];
-
-            const refArgs = functionArgNames.getRefs(reducerFunc, secondArg);
-
-            return refArgs || reducerArgs[1];
-        }
-    }
-    return [];
+const getReducerActionFields = (reducerFunc, actionType) => {
+    return (reducerFunc != null) ?
+        getActionFields(reducerFunc, actionType) || [] :
+        [];
 };
 
 export const makeReducer = (reducerTable, initialState) =>

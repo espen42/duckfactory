@@ -1,11 +1,3 @@
-## IMPORTANT: 
-**A naughty bug has been discovered!** It causes a problem (loss of action creator arguments) when duckfactory is used in projects that use code mangling (code minification / uglification) for production with tools like webpack.
-
-I'm currently working on this and will release a bugfix version when it's solved. **Until then I don't recommend using duckfactory (v1.2.6 or below) or goosefactory (version 1.2.7 or below) with production-mangled code.**
-
-
----
-
 # Duckfactory
 **Simple creation and use of redux ducks.**
 
@@ -28,6 +20,8 @@ or
 ```
 yarn add duckfactory
 ```
+
+**NOTE:** if your app uses minification/uglification, version 1.3.0 should be okay, but don't use the versions below. 
 
 ## How does it work?
 

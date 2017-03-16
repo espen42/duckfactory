@@ -20,8 +20,8 @@ describe("duckfactory", ()=>{
             const duckFactory = new DuckFactory("duck/test1", {}, {
                 setHey: (state, {ya}) => ({hey: ya}),
                 doubleHey: (state) => ({hey: state.hey * 2}),
-                // Note that while first, second and third become the three direct arguments for the action creator below,
-                // the {first, second, third} object is ONE argument in the definition here.
+                // Note that while first, second and third become the three direct arguments for the action creator
+                // below, the {first, second, third} object is technically ONE argument in the definition here.
                 insertSecondAndThirdAsWhoaYeah: (state, {first, second, third}) => {
                     return {
                         ...state,
@@ -102,18 +102,9 @@ describe("duckfactory", ()=>{
         
         
         
-        /** If the reducer function has a second object but it's NOT a deconstructed object, the action creator will be
-         *  more generic: it will treat the second argument as the entire action object coming in to the reducer.
-         *
-         *  While it will therefore be preferable if the second argument is called 'action' to make that clear, the
-         *  name won't actually matter as long as it's consistently used in the reducer function.
-         *
-         *  The argument sent in to the action creator will be expected to be an object, which won't have any 'type' key
-         *  but can otherwise have any shape - the action object will simply be the argument object with...
-         *
-         *     type: <actionType>
-         *
-         *  ...added. Handling the content with then be completely up to the reducer.
+        /** If the reducer function has a second object but it's NOT a deconstructed object, the action creator will
+         *  treat the second argument as an object, and look for references to fields in the action, and use those
+         *  as the action creator arguments in the order that they were found.
          */
         it("creates a generic action creator if the second argument of the reducer function is not a deconstructed " +
             "object", ()=>{
@@ -129,58 +120,30 @@ describe("duckfactory", ()=>{
 
             expect(actions.takeAction()).to.deep.equal({
                 type: "duck/testGeneric/takeAction",
+                hey: undefined,
+                inside: undefined,
             });
             
-            expect(actions.takeAction({ hey: 45, inside: "suchagreatgame", ignored: "bythereducer" })).to.deep.equal({
+            expect(actions.takeAction(45, "wassuchagreatgame", "ignored")).to.deep.equal({
                 type: "duck/testGeneric/takeAction",
                 hey: 45,
-                inside: "suchagreatgame",
-                ignored: "bythereducer",
-            });
-            
-            expect(actions.takeAction({
-                completely: "different",
-                arguments: "but",
-                thatt: "only",
-                matters: "to",
-                the: "reducer",
-                so: "the",
-                actioncreator: "is",
-                fine: "withthis",
-            })).to.deep.equal({
-                type: "duck/testGeneric/takeAction",
-                completely: "different",
-                arguments: "but",
-                thatt: "only",
-                matters: "to",
-                the: "reducer",
-                so: "the",
-                actioncreator: "is",
-                fine: "withthis",
+                inside: "wassuchagreatgame",
             });
 
-            // Fails because the action creator needs an object argument, not a number:
-            expect( () => { return actions.setNothing(666); }).to.throw(Error);
-
-            // Fails because the action creator needs an object argument, not a string, etc:
-            expect( () => { return actions.setNothing("nope"); }).to.throw(Error);
-
-            // Fails because the object can't have a 'type' key - it's reserved for redux:
-            expect( () => { return actions.setNothing({ type: "nonono" }); }).to.throw(Error);
         });
         
         
-        // If the reducer function definition has a second argument and then more after that,
-        // the third and rest of them will be ignored by the action creator
+        // If the reducer function definition has a second argument and THEN more after that, those will be ignored.
         it("will not carry any arguments beyond the second one (no matter if the second one is a deconstructed object " +
             "or just an ordinary, generic one)", ()=>{
             const duckFactory = new DuckFactory("duck/testSurplus", {}, {
+
                 insertWhoaYeah: (state, {whoa, yeah}, ignorable) => ({
                     ...state,
                     whoa: whoa,
                     yeah: "Yeah " + yeah,
                 }),
-                
+
                 generic: (state, action, nevermind) => ({
                     ...state,
                     whoa: action.whoa,
@@ -195,30 +158,31 @@ describe("duckfactory", ()=>{
                 whoa: 2,
                 yeah: 42,
             });
-            
+
             expect( actions.insertWhoaYeah(2, 42, 1234) ).to.deep.equal({
                 type: "duck/testSurplus/insertWhoaYeah",
                 whoa: 2,
                 yeah: 42,
             });
-            
-            expect( actions.generic({oki: 2, doki: 42}) ).to.deep.equal({
+
+            expect( actions.generic(2, 42) ).to.deep.equal({
                 type: "duck/testSurplus/generic",
-                oki: 2,
-                doki: 42,
+                whoa: 2,
+                yeah: 42,
             });
-            
-            expect( actions.generic({oki: 2, doki: 42}, {poky: 1234}) ).to.deep.equal({
+
+            expect( actions.generic(2, 42, {poky: 1234}) ).to.deep.equal({
                 type: "duck/testSurplus/generic",
-                oki: 2,
-                doki: 42,
+                whoa: 2,
+                yeah: 42,
             });
-            expect( actions.generic({oki: 2, doki: 42}, "smoky") ).to.deep.equal({
+
+            expect( actions.generic(2, 42, "smoky") ).to.deep.equal({
                 type: "duck/testSurplus/generic",
-                oki: 2,
-                doki: 42,
+                whoa: 2,
+                yeah: 42,
             });
-           
+
         });
     });
 
@@ -244,42 +208,49 @@ describe("duckfactory", ()=>{
                     
                 }),
             }, true, true);
-        
-            const actions = duckFactory.getActionCreators();                // Examples of resulting actions below:
+		
+            const actions = duckFactory.getActionCreators();
             const reducer = duckFactory.getReducer();
 
             const STATE = deepFreeze({hey: 37});
 
-            let reduced = reducer(STATE, actions.setHey(42) );               // action: {type: 'duck/test2/setHey', hey: 42}
+            // Examples of resulting actions:
+            // {type: 'duck/test2/setHey', ya: 42}
+            let reduced = reducer(STATE, actions.setHey(42) );
             expect(reduced).to.deep.equal({hey: 42});
 
-            reduced = reducer(reduced, actions.doubleHey() );                // action: {type: 'duck/test2/doubleHey'}
+            // {type: 'duck/test2/doubleHey'}
+            reduced = reducer(reduced, actions.doubleHey() );
             expect(reduced).to.deep.equal({hey: 84});
 
-            reduced = reducer(reduced, actions.insertWhoaYeah(6, 19) );     // {type: 'duck/test2/insertWhoaYeah', whoa: 6, yeah: 19}
+            // {type: 'duck/test2/insertWhoaYeah', whoa: 6, yeah: 19}
+            reduced = reducer(reduced, actions.insertWhoaYeah(6, 19) );
             expect(reduced).to.deep.equal({
                 hey: 84,
                 whoa: 6,
                 yeah: "Yeah 19",
             });
-            
-            reduced = reducer(reduced, actions.notEvenState() );            // {type: 'duck/test2/notEvenState'}
+
+            // {type: 'duck/test2/notEvenState'}
+            reduced = reducer(reduced, actions.notEvenState() );
             expect(reduced).to.deep.equal({
                 wasReset: true,
             });
 
-            reduced = reducer(reduced, actions.generic( {some: "new", irrelevant: "content"}) );
+            // {type: 'duck/test2/generic', whoa: "new", yeah: "content"}
+            reduced = reducer(reduced, actions.generic( "new", "content") );
             expect(reduced).to.deep.equal({
                 wasReset: true,
-                whoa: undefined,
-                yeah: "Yeah undefined",
+                whoa: "new",
+                yeah: "Yeah content",
             });
-            
+
+            // {type: 'duck/test2/generic', whoa: {whoa: "much", yeah: "better"}, yeah: undefined}
             reduced = reducer(reduced, actions.generic( {whoa: "much", yeah: "better"}) );
             expect(reduced).to.deep.equal({
                 wasReset: true,
-                whoa: "much",
-                yeah: "Yeah better",
+                whoa: {whoa: "much", yeah: "better"},
+                yeah: "Yeah undefined",
             });
         });
     });
