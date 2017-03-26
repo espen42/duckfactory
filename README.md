@@ -118,9 +118,9 @@ console.log(action2);
 ```
 
 
-### Hooking it up: exporting to combinereducers
+### Hooking it up: exporting to combine reducers
 
-If you've used redux before, this should be simple. At the bottom of the reducer file above, export the necessary:
+If you've used redux before, this should be simple. At the bottom of `users.js`, export the necessary:
 
 ```javascript
 export default userGeese.getReducers();
@@ -141,7 +141,7 @@ export default combineReducers({
 });
 ```
 
-I haven't tried, but I can't see any reason it shouldn't work to mix reducers from duckfactories with reducers that are created in other way, e.g. regular redux. Just take care to handle the action names and make them all unique. If anyone tries this, I'd like to hear about it.
+I haven't tried, but I can't see any reason it shouldn't work to mix reducers from duckfactories with reducers that are created in _other_ ways, e.g. regular redux if you need to. You probably want to make sure the action names are all unique, though.
 
 ### Constructor:
 
