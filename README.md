@@ -179,7 +179,7 @@ yarn add duckfactory
 
 
 ## Contributions
-Suggestions, improvements, corrections, bug notifications, etc... all is welcome on [github](https://github.com/espen42/goosefactory) or _espen42@gmail.com_. Special thanks to **NorwegianKiwi** for awesome help!
+Suggestions, improvements, corrections, bug notifications, etc... all is welcome on [github](https://github.com/espen42/duckfactory) or _espen42@gmail.com_. Special thanks to **NorwegianKiwi** for awesome help!
 
 
 ## Using it with redux-sagas
