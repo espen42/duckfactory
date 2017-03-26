@@ -11,12 +11,12 @@ Duckfactory is a library for wrapping and simplifying this even more. It auto-ge
 In short, give it a prefix string to group the actions, an initial state, an object with the names of action creators and the reducers the actions should trigger. It will then create an object that exposes ordinary redux action creators, reducers and action types.
 
 
-### Definition
+### Example
 
 ```javascript
 import DuckFactory from 'duckfactory';
 
-// Just an example initial redux state (userId → userObject) to illustrate what the reducers are working on:
+// Just an example initial redux state (userId → userObject):
 const initialState = {
     42: {
         name: "Arthurarthurdent",
@@ -25,7 +25,7 @@ const initialState = {
     },
 };
 
-// Defining two ducks in one collection called 'users':
+// Defining two ducks in the collection 'myapp/userducks':
 const userDucks = new DuckFactory("myapp/userducks", initialState, {
     setName: (state, {userId, newName}) => {
         const newUser = {...state[userId]};
@@ -152,7 +152,7 @@ yarn add duckfactory
 
 
 ## Contributions
-Suggestions, improvements, corrections, bug notifications, etc... all is welcome on [github](https://github.com/espen42/goosefactory) or _espen42@gmail.com_. Special thanks to **NorwegianKiwi**!
+Suggestions, improvements, corrections, bug notifications, etc... all is welcome on [github](https://github.com/espen42/goosefactory) or _espen42@gmail.com_. Special thanks to **NorwegianKiwi** for awesome help!
 
 
 ## Using it with redux-sagas
