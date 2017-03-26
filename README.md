@@ -13,6 +13,8 @@ In short, give it a prefix string to group the actions, an initial state, an obj
 
 ### Example
 
+Let's define a reducer in an example file `users.js`:
+
 ```javascript
 import DuckFactory from 'duckfactory';
 
@@ -115,6 +117,31 @@ console.log(action2);
 //  }
 ```
 
+
+### Hooking it up: exporting to combinereducers
+
+If you've used redux before, this should be simple. At the bottom of the reducer file above, export the necessary:
+
+```javascript
+export default userGeese.getReducers();
+export const actionCreators = userGeese.getActionCreators();
+```
+
+...and then use the default export in combinereducers as usual, with other duckfactories if you like:
+
+```javascript
+import { combineReducers } from 'redux';
+
+import userReducer from './users'; // <-- This is the default export from above
+import gameReducer from './game';
+
+export default combineReducers({
+    game: gameReducer,
+    users: userReducer
+});
+```
+
+I haven't tried, but I can't see any reason it shouldn't work to mix reducers from duckfactories with reducers that are created in other way, e.g. regular redux. Just take care to handle the action names and make them all unique. If anyone tries this, I'd like to hear about it.
 
 ### Constructor:
 
