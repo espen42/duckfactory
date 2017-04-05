@@ -7,7 +7,7 @@ const prePattern = new RegExp("function .*? ?\\(.*?\\)\\s*\\{\\s*", 'g');
  *  Credit: https://davidwalsh.name/javascript-arguments
  */
 const getFunctionArgNames = (funcStr) => {
-    const args = funcStr.match(/function\s.*?\(([^)]*)\)/)[1];
+    const args = funcStr.match(/function.*?\(([^)]*)\)/)[1];
     return args
         .split(',')
         .map(function (arg) {
