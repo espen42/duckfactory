@@ -35,10 +35,9 @@ const getActionType = (prefix, actionName) =>
 
 
 const makeActionCreator = (actionType, actionArgumentNames = [], checkAndLog, logBuilt) => {
-    const action = {type: actionType};
-
     if (typeof actionArgumentNames === 'string') {
         return (arg) => {
+            const action = {type: actionType};
             if (checkAndLog) {
                 if (arg == null) {
                     console.warn("The generic action '" + actionType + "' is expected to be created with an argument object, not:",
@@ -62,6 +61,7 @@ const makeActionCreator = (actionType, actionArgumentNames = [], checkAndLog, lo
 
     } else {
         return (...args) => {
+            const action = {type: actionType};
             actionArgumentNames.forEach( (key, idx) => { action[key] = args[idx]; } );
             if (logBuilt) {
                 console.log("New reducer action:", action);

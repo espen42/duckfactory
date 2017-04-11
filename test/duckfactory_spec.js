@@ -70,6 +70,44 @@ describe("duckfactory", ()=>{
                 third: undefined,
             });
         });
+
+        it("...and each action creator produces new action objects in each call (doesn't recycle objects)", ()=>{
+            const duckFactory = new DuckFactory("duck/testUnique", {}, {
+                setHey: (state, {ya}) => ({hey: ya}),
+                doubleHey: (state) => ({hey: state.hey * 2}),
+                insertSecondAndThirdAsWhoaYeah: (state, {first, second, third}) => {
+                    return {
+                        ...state,
+                        hey: first,
+                        whoa: second,
+                        yeah: "Yeah: " + third,
+                    };
+                },
+            }, true, false);
+            const actions = duckFactory.getActionCreators();
+
+            // Expect the value of the first action object to not be affected by the creation of the second:
+            const ac1 = deepFreeze(actions.setHey(1));
+            const ac2 = deepFreeze(actions.setHey(4));
+            expect(ac1.ya).to.equal(1);
+            expect(ac2.ya).to.equal(4);
+
+            // Uniqueness even applies to argument-less actions (and in a different way than a clone):
+            const ac3 = deepFreeze(actions.doubleHey());
+            const ac3b = ac3;
+            const ac4 = deepFreeze(actions.doubleHey());
+            expect(ac3b).to.equal(ac3);
+            expect(ac3).to.not.equal(ac4);
+
+            // All values behave as expected, and independently:
+            const ac5 = deepFreeze(actions.insertSecondAndThirdAsWhoaYeah(10,20,30));
+            const ac6 = deepFreeze(actions.insertSecondAndThirdAsWhoaYeah(15,20,35));
+
+            expect(ac5.type).to.equal(ac6.type);
+            expect(ac5.first).to.not.equal(ac6.first);
+            expect(ac5.second).to.equal(ac6.second);
+            expect(ac5.third).to.not.equal(ac6.third);
+        });
         
         // If the reducer function has no second object (or even no first), the action creator will not take any args
         // (or more specifically; will ignore any args) and the action will only carry the action type.
