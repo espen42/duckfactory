@@ -1,5 +1,5 @@
 const varNameRegex = "[a-zA-Z_$][0-9a-zA-Z_$]*";
-const prePattern = new RegExp("function .*? ?\\(.*?\\)\\s*\\{\\s*", 'g');
+const prePattern = new RegExp("function.*?\\(.*?\\)\\s*\\{\\s*", 'g');
 
 /** Returns an array with the names of the direct names of a function (e.g. for the function a = (b, c) => {}
  *  getFunctionArgNames(a) will return ["b", "c"]).
