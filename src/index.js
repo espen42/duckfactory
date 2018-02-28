@@ -155,6 +155,5 @@ class DuckFactory {
     getReducer() { return this._reducer; }
     getActionCreators() { return this._actionCreators; }
     getTypes() { return this._types; }
-
 }
 export default DuckFactory;
