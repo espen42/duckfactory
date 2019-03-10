@@ -44,11 +44,12 @@ describe("check", ()=>{
             ); }).to.throw(Error); // Whoa there, can't call an action creator argument 'type'.
 
 
+            // NO LONGER shall this throw an error, just log a warning.
             expect(()=>{check(
                 (state, {woop, wheee, ohyes}) => { console.log("Awright"); },
                 "ACTION1",
                 ["woop", "wheee", "ohyes"],
-            ); }).to.throw(Error); // Oh no you don't, there's already been spotted an action called "ACTION1".
+            ); }).to.not.throw(Error); // Oh no you don't, there's already been spotted an action called "ACTION1".
 
         });
 

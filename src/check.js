@@ -11,10 +11,13 @@ const checkActionName = actionName => {
             "Only strings allowed.");
     }
     if (takenActionNames.has(actionName)) {
-        throw Error("Action name " + JSON.stringify(actionName) + " is already taken. Action names must be unique. " +
+        console.warn("Action name " + JSON.stringify(actionName) + " is already taken. " +
+            "Action names must be unique (this may just be a case of a double initialization of Duckfactory). " +
             "Existing names are: " + JSON.stringify(takenActionNames));
+
+    } else {
+        takenActionNames.add(actionName);
     }
-    takenActionNames.add(actionName);
 };
 
 const checkActionArgumentNames = (actionArgumentNames, actionType) => {

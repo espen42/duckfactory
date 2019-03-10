@@ -436,7 +436,8 @@ describe("duckfactory", ()=>{
 
         });
 
-        it("throws an error if all produced action types are not globally unique, " +
+        // No longer throws an error. But logs a warning.
+        it("logs a warning if all produced action types are not globally unique, " +
             "even across different duckfactories", ()=>{
             expect( ()=>{
                 new DuckFactory("this/is", {}, {
@@ -466,7 +467,7 @@ describe("duckfactory", ()=>{
                     notUnique: (state, {ya}) => ({hey: ya}),
                 }, true, true);
 
-            }).to.throw(Error);
+            }).to.not.throw(Error);
         });
     });
 });
